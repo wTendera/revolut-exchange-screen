@@ -33,17 +33,20 @@ To run the application you will need to have [npm](https://www.npmjs.com/get-npm
 
 ### Installing
 
+Before running the application make sure you created `.env` file in main directory and that you have set up `REACT_APP_EXCHANGE_ID` which is your `APP_ID` from [https://openexchangerates.org](https://openexchangerates.org)
+
 To install and run the application, first run:
 
 ```
 npm install
 ```
 
-then
+later
 
 ```
 npm start
 ```
+
 
 ## Running the tests
 `npm test`
