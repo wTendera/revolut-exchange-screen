@@ -1,24 +1,34 @@
-import React from 'react';
+import React, {Component} from 'react';
 
-function App() {
-  return (
-    <div className="app">
-      <div className="exchanging-form-container">
-        <div className="exchanging-form-box">
-          <h2>EUR</h2>
-          <p>You have 25.00 EUR</p>
-        </div>
-        <div className="exchanging-form-box">
-          <h2>GBP</h2>
-          <p>You have 13.00 GBP</p>
-        </div>
+class App extends Component {
+  componentDidMount() {
+    this.props.action("CURRENCIES_FETCH_REQUESTED")
+  }
 
-        <div className="submit-button-container">
-          <button className="submit-button">Exchange</button>
+  onExchangeClicked = () => {
+    alert("todo")
+  }
+
+  render() {
+    return (
+      <div className="app">
+        <div className="exchanging-form-container">
+          <div className="exchanging-form-box">
+            <h2>EUR</h2>
+            <p>You have 25.00 EUR</p>
+          </div>
+          <div className="exchanging-form-box">
+            <h2>GBP</h2>
+            <p>You have 13.00 GBP</p>
+          </div>
+  
+          <div className="submit-button-container">
+            <button className="submit-button" onClick={this.onExchangeClicked}>Exchange</button>
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  }
 }
 
 export default App;
