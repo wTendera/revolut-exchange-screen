@@ -7,8 +7,8 @@ it('fetchCurrencies Saga test', () => {
 
   expect(gen.next().value).toEqual(call(ExchangeAPI.fetchCurrencies))
   expect(gen.next().value).toEqual(put({type: "CURRENCIES_FETCH_SUCCEEDED"}))
-  expect(gen.next().value).toEqual(call(delay, 1000))
+  expect(gen.next().value).toEqual(call(delay, 60000))
   expect(gen.next().value).toEqual(call(ExchangeAPI.fetchCurrencies))
   expect(gen.next().value).toEqual(put({type: "CURRENCIES_FETCH_SUCCEEDED"}))
-  expect(gen.next().value).toEqual(call(delay, 1000))
+  expect(gen.next().value).toEqual(call(delay, 60000))
 });

@@ -20,5 +20,11 @@ function* fetchCurrenciesAsync() {
    
 }
 
-export {fetchCurrencies}
+function updateBalances(balances) {
+   return {type: "CURRENCIES_BALANCES_UPDATED", balances};
+}
+
+
+
+export {fetchCurrencies, updateBalances}
 export default fetchCurrenciesAsync;
