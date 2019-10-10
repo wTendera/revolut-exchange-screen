@@ -51,34 +51,42 @@ class CurrenciesSwitcher extends Component {
     return true;
   }
 
-  onValueFromChange = (e) => {
-    const { value } = e.target;
+  onValueFromChange = (values) => {
+    const { value } = values;
     const { currencyFrom, currencyTo } = this.state;
     const { currencies } = this.props;
 
     this.setState({
-      valueFrom: e.target.value,
+      valueFrom: value,
       valueTo: value/(currencies[currencyFrom] || 1) * currencies[currencyTo]
     });
   } 
 
-  onValueToChange = (e) => {
-    const { value } = e.target;
+  onValueToChange = (values) => {
+    const { value } = values;
     const { currencyFrom, currencyTo } = this.state;
     const { currencies } = this.props;
     
     this.setState({
       valueFrom: value/(currencies[currencyTo] || 1) * currencies[currencyFrom],
-      valueTo: e.target.value,
+      valueTo: value,
     });
   } 
 
   onCurrencyFromChange = (currencyFrom) => {
-    this.setState({currencyFrom})
+    this.setState({
+      currencyFrom,
+      valueTo: '',
+      valueFrom: ''
+    })
   }
 
   onCurrencyToChange = (currencyTo) => {
-    this.setState({currencyTo})
+    this.setState({
+      currencyTo,
+      valueTo: '',
+      valueFrom: ''
+    })
   }
 
   setPreviousFromCurrency = () => {
@@ -138,8 +146,12 @@ class CurrenciesSwitcher extends Component {
                 <i className="fa fa-chevron-right" />
               </button>
             </h2>
-            <input type="number" value={valueFrom} onChange={this.onValueFromChange}/>
-
+            <CurrencyFormat 
+              value={valueFrom} 
+              thousandSeparator={true} 
+              decimalScale={2}
+              allowNegative={false}
+              onValueChange={this.onValueFromChange}/>
             <p>You have <CurrencyFormat value={balances[currencyFrom]} displayType={'text'} thousandSeparator={true} decimalScale={2} />
             &nbsp;{currencyFrom}</p>
         </div>
@@ -154,7 +166,12 @@ class CurrenciesSwitcher extends Component {
                 <i className="fa fa-chevron-right"/>
               </button>
             </h2>
-            <input type="number" value={valueTo} onChange={this.onValueToChange}/>
+            <CurrencyFormat 
+              value={valueTo} 
+              thousandSeparator={true} 
+              decimalScale={2}
+              allowNegative={false}
+              onValueChange={this.onValueToChange}/>
             <p>You have <CurrencyFormat value={balances[currencyTo]} displayType={'text'} thousandSeparator={true} decimalScale={2} />
             &nbsp;{currencyTo}</p>
             <p className="exchange-rate value-to">
