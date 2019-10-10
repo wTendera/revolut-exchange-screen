@@ -18,7 +18,7 @@ describe('CurrenciesSwitcher component', () => {
 
     it('does not allow to use more money than user balance for currency', () => {
       const wrapper = shallow(
-           <CurrenciesSwitcher balances={{"EUR": 10}}/>
+           <CurrenciesSwitcher balances={{"EUR": 10}} currencies={{}}/>
         );
 
       const componentInstance = wrapper.instance();
@@ -44,6 +44,31 @@ describe('CurrenciesSwitcher component', () => {
       expect(mockCallback.mock.calls[0][0]).toStrictEqual({
         "EUR": 9,
         "USD": 1.5
+      });  
+
+      expect(onExchangeClickedRes).toBe(true);
+    })
+
+    it('exchanges money bases od current exchange rate for currency different than USD', () => {
+      const mockCallback = jest.fn(x => x);
+
+      const wrapper = shallow(
+        <CurrenciesSwitcher 
+          balances={{"EUR": 10, "USD": 3, "GBP": 2}} 
+          currencies={{"USD": 2, "GBP": 0.8}} 
+          updateBalances={mockCallback}/>
+      );
+
+      const componentInstance = wrapper.instance();
+      componentInstance.onCurrencyFromChange("USD")
+      componentInstance.onCurrencyToChange("GBP")
+      componentInstance.onValueFromChange({target: {value: 1}})
+
+      let onExchangeClickedRes = componentInstance.onExchangeClicked();
+      expect(mockCallback.mock.calls[0][0]).toStrictEqual({
+        "EUR": 10,
+        "USD": 2,
+        "GBP": 2.4
       });  
 
       expect(onExchangeClickedRes).toBe(true);

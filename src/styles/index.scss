@@ -74,6 +74,42 @@ input {
   .exchanging-form-box {
     padding: 16px;
     border-bottom: 1px solid #dddddd;
+
+    .exchange-rate {
+      color: $gray;
+      font-size: 0.8rem;
+      margin-top: 8px;
+      text-align: center;
+
+      &.value-to {
+        text-align: left;
+      }
+    }
+
+    h2 {
+      button  {
+        &.left {
+          margin: 0 4px 0 0;
+        }
+        &.right {
+          margin: 0 0 0 4px;
+        }
+      }
+
+      i {
+        color: $gray;
+        padding: 0 4px;
+        cursor: pointer;
+        // font-weight: 300;
+        font-size: 1.4rem;
+        
+
+        &:hover {
+          color: $blue
+        }
+      }
+    }
+    
   }
   
   .submit-button-container {

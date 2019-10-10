@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { updateBalances } from '../redux/sagas'
+import CurrencyFormat from 'react-currency-format';
+ 
 const currencies = [
   'USD', 'EUR', 'GBP'
 ]
@@ -11,6 +13,19 @@ class CurrenciesSwitcher extends Component {
     currencyTo: currencies[0],
     valueFrom: '',
     valueTo: '',
+  }
+
+
+  getExchangeRateForCurrentCurrencies = () => {
+    const { currencyFrom, currencyTo } = this.state;
+    const { currencies = {}} = this.props;
+    return 1/(currencies[currencyFrom] || 1) * currencies[currencyTo]
+  }
+
+  getValueToExchangeRate = () => {
+    const { currencyFrom, currencyTo } = this.state;
+    const { currencies = {}} = this.props;
+    return 1/(currencies[currencyTo] || 1) * currencies[currencyFrom]
   }
 
   onExchangeClicked = () => {
@@ -26,39 +41,135 @@ class CurrenciesSwitcher extends Component {
     }
 
     newBalances[currencyFrom] = balances[currencyFrom] - valueFrom;
-    newBalances[currencyTo] = balances[currencyTo] + valueFrom * currencies[currencyTo]
+    newBalances[currencyTo] = balances[currencyTo] + valueFrom/(currencies[currencyFrom] || 1) * currencies[currencyTo]
 
+    this.setState({
+      valueFrom: '',
+      valueTo: '',
+    })
     updateBalances(newBalances)
     return true;
   }
 
   onValueFromChange = (e) => {
+    const { value } = e.target;
+    const { currencyFrom, currencyTo } = this.state;
+    const { currencies } = this.props;
+
     this.setState({
       valueFrom: e.target.value,
+      valueTo: value/(currencies[currencyFrom] || 1) * currencies[currencyTo]
     });
   } 
 
   onValueToChange = (e) => {
+    const { value } = e.target;
+    const { currencyFrom, currencyTo } = this.state;
+    const { currencies } = this.props;
+    
     this.setState({
+      valueFrom: value/(currencies[currencyTo] || 1) * currencies[currencyFrom],
       valueTo: e.target.value,
     });
   } 
 
+  onCurrencyFromChange = (currencyFrom) => {
+    this.setState({currencyFrom})
+  }
+
+  onCurrencyToChange = (currencyTo) => {
+    this.setState({currencyTo})
+  }
+
+  setPreviousFromCurrency = () => {
+    const { currencyFrom } = this.state;
+    const newIndex = (currencies.indexOf(currencyFrom) - 1 + currencies.length) % currencies.length;
+    this.onCurrencyFromChange(currencies[newIndex]);
+  }
+
+  setNextFromCurrency = () => {
+    const { currencyFrom } = this.state;
+    const newIndex = (currencies.indexOf(currencyFrom) + 1) % currencies.length;
+    this.onCurrencyFromChange(currencies[newIndex]);
+  }
+
+  setPreviousToCurrency = () => {
+    const { currencyTo } = this.state;
+    const newIndex = (currencies.indexOf(currencyTo) - 1 + currencies.length) % currencies.length;
+    this.onCurrencyToChange(currencies[newIndex]);
+  }
+
+  setNextToCurrency = () => {
+    const { currencyTo } = this.state;
+    const newIndex = (currencies.indexOf(currencyTo) + 1) % currencies.length;
+    this.onCurrencyToChange(currencies[newIndex]);
+  }
+
+
   render () {
     const { balances } = this.props;
     const { currencyFrom, currencyTo, valueFrom, valueTo } = this.state;
+    const currentExchangeRate = this.getExchangeRateForCurrentCurrencies();
+    const currentExchangeRateForValueTo = this.getValueToExchangeRate();
+    
     return (
       <div className="exchanging-form-container">
         <div className="exchanging-form-box">
-            <h2>{currencyFrom}</h2>
+            <p className="exchange-rate">
+              {
+                currentExchangeRate ? 
+                  <>
+                    1 {currencyFrom} =&nbsp;
+                    <CurrencyFormat value={currentExchangeRate} displayType={'text'} thousandSeparator={true} decimalScale={2} />
+                    &nbsp;
+                    {currencyTo}
+                  </>
+                  :
+                  "Loading"
+              }
+              
+            </p>
+            <h2>
+              <button className="left" onClick={this.setPreviousFromCurrency}>
+                <i className="fa fa-chevron-left" /> 
+              </button>
+              {currencyFrom} 
+              <button className="right" onClick={this.setNextFromCurrency}>
+                <i className="fa fa-chevron-right" />
+              </button>
+            </h2>
             <input type="number" value={valueFrom} onChange={this.onValueFromChange}/>
-            <p>You have {balances[currencyFrom]} {currencyFrom}</p>
+
+            <p>You have <CurrencyFormat value={balances[currencyFrom]} displayType={'text'} thousandSeparator={true} decimalScale={2} />
+            &nbsp;{currencyFrom}</p>
         </div>
 
         <div className="exchanging-form-box">
-            <h2>{currencyTo}</h2>
+            <h2>
+              <button className="left" onClick={this.setPreviousToCurrency}>
+                <i className="fa fa-chevron-left"/>
+              </button>
+              {currencyTo} 
+              <button className="right" onClick={this.setNextToCurrency}>
+                <i className="fa fa-chevron-right"/>
+              </button>
+            </h2>
             <input type="number" value={valueTo} onChange={this.onValueToChange}/>
-            <p>You have {balances[currencyTo]} {currencyTo}</p>
+            <p>You have <CurrencyFormat value={balances[currencyTo]} displayType={'text'} thousandSeparator={true} decimalScale={2} />
+            &nbsp;{currencyTo}</p>
+            <p className="exchange-rate value-to">
+              {
+                currentExchangeRateForValueTo ? 
+                  <>1 {currencyTo} =&nbsp;
+                  <CurrencyFormat value={currentExchangeRateForValueTo} displayType={'text'} thousandSeparator={true} decimalScale={2} />
+                  &nbsp;
+                  {currencyFrom}
+                  </>
+                  :
+                  "Loading"
+              }
+              
+            </p>
         </div>
 
         <div className="submit-button-container">

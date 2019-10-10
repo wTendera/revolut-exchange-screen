@@ -1,8 +1,8 @@
 export default function exchangeRates(state = {
   balances: {
-    'USD': 0,
+    'USD': 1500,
     'EUR': 20.56,
-    'GBP': 2.45,
+    'GBP': 20000.45,
   }
 }, action) {
     switch (action.type) {
