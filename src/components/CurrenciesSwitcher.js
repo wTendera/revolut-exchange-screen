@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { updateBalances } from '../redux/sagas'
 import { toast } from 'react-toastify';
@@ -125,6 +126,13 @@ class CurrenciesSwitcher extends Component {
   }
 }
 
+CurrenciesSwitcher.propTypes = {
+  balances: PropTypes.shape({}),
+  updateBalances: PropTypes.func,
+  currencies: PropTypes.shape({})
+}
+
+
 function mapStateToProps(state) {
   return {
     currencies: state.currencies,
@@ -138,5 +146,4 @@ function mapDispatchToProps(dispatch) {
   }
 }
 export { CurrenciesSwitcher }
-
 export default connect(mapStateToProps, mapDispatchToProps)(CurrenciesSwitcher);

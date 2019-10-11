@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types'
 import CurrencyFormat from 'react-currency-format';
 
 const CurrenciesSwitcherPresenter = ({
@@ -102,5 +103,33 @@ const CurrenciesSwitcherPresenter = ({
 
       </div>
 )
+
+
+CurrenciesSwitcherPresenter.propTypes = {
+  currentExchangeRate: PropTypes.number,
+  currencyFrom: PropTypes.string,
+  currencyTo: PropTypes.string,
+  valueFrom: PropTypes.oneOfType([
+    PropTypes.number,
+    PropTypes.string,
+  ]),
+  valueTo: PropTypes.oneOfType([
+    PropTypes.number,
+    PropTypes.string,
+  ]),
+  exceedsBalance: PropTypes.bool,
+  balances: PropTypes.shape({}),
+  currentExchangeRateForValueTo: PropTypes.number,
+  submitDisabled: PropTypes.bool,
+  onValueFromChange: PropTypes.func,
+  onValueToChange: PropTypes.func,
+  onSubmit: PropTypes.func,
+  swapCurrencies: PropTypes.func,
+  setPreviousToCurrency: PropTypes.func,
+  setNextToCurrency: PropTypes.func,
+  setPreviousFromCurrency: PropTypes.func,
+  setNextFromCurrency: PropTypes.func,
+}
+
 
 export default CurrenciesSwitcherPresenter;
