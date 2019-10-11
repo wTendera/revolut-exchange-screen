@@ -1,12 +1,9 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { updateBalances } from '../redux/sagas'
-import CurrencyFormat from 'react-currency-format';
-import { ToastContainer, toast } from 'react-toastify';
-
-const currencies = [
-  'USD', 'EUR', 'GBP'
-]
+import { toast } from 'react-toastify';
+import CurrenciesSwitcherPresenter from './CurrenciesSwitcherPresenter';
+import currencies from './currencies.js'
 
 class CurrenciesSwitcher extends Component {
   state = {
@@ -15,7 +12,6 @@ class CurrenciesSwitcher extends Component {
     valueFrom: '',
     valueTo: '',
   }
-
 
   getExchangeRateForCurrentCurrencies = () => {
     const { currencyFrom, currencyTo } = this.state;
@@ -29,11 +25,11 @@ class CurrenciesSwitcher extends Component {
     return 1/(currencies[currencyTo] || 1) * currencies[currencyFrom]
   }
 
-  onExchangeClicked = () => {
+  onSubmit = () => {
     const { currencyFrom, currencyTo, valueFrom } = this.state;
     const { balances, updateBalances, currencies } = this.props;
 
-    if(valueFrom > balances[currencyFrom] || currencyFrom === currencyTo || !valueFrom) {
+    if(valueFrom > balances[currencyFrom] || currencyFrom === currencyTo || valueFrom === '') {
       return false;
     }
 
@@ -76,56 +72,26 @@ class CurrenciesSwitcher extends Component {
     });
   } 
 
-  onCurrencyFromChange = (currencyFrom) => {
+  onCurrencyChange = ({currencyFrom = this.state.currencyFrom, currencyTo = this.state.currencyTo}) => {
     this.setState({
       currencyFrom,
-      valueTo: '',
-      valueFrom: ''
-    })
-  }
-
-  onCurrencyToChange = (currencyTo) => {
-    this.setState({
       currencyTo,
       valueTo: '',
       valueFrom: ''
     })
   }
 
-  setPreviousFromCurrency = () => {
+  changeCurrencyFrom = (direction = 1) => {
     const { currencyFrom } = this.state;
-    const newIndex = (currencies.indexOf(currencyFrom) - 1 + currencies.length) % currencies.length;
-    this.onCurrencyFromChange(currencies[newIndex]);
+    const newIndex = (currencies.indexOf(currencyFrom) + direction + currencies.length) % currencies.length;
+    this.onCurrencyChange({currencyFrom: currencies[newIndex]});
   }
 
-  setNextFromCurrency = () => {
-    const { currencyFrom } = this.state;
-    const newIndex = (currencies.indexOf(currencyFrom) + 1) % currencies.length;
-    this.onCurrencyFromChange(currencies[newIndex]);
-  }
-
-  setPreviousToCurrency = () => {
+  changeCurrencyTo = (direction = 1) => {
     const { currencyTo } = this.state;
-    const newIndex = (currencies.indexOf(currencyTo) - 1 + currencies.length) % currencies.length;
-    this.onCurrencyToChange(currencies[newIndex]);
+    const newIndex = (currencies.indexOf(currencyTo) + direction + currencies.length) % currencies.length;
+    this.onCurrencyChange({currencyTo: currencies[newIndex]});
   }
-
-  setNextToCurrency = () => {
-    const { currencyTo } = this.state;
-    const newIndex = (currencies.indexOf(currencyTo) + 1) % currencies.length;
-    this.onCurrencyToChange(currencies[newIndex]);
-  }
-
-  swapCurrencies = () => {
-    const { currencyFrom, currencyTo } = this.state;
-    this.setState({
-      currencyFrom: currencyTo,
-      currencyTo: currencyFrom,
-      valueFrom: '',
-      valueTo: ''
-    })
-  }
-
 
   render () {
     const { balances } = this.props;
@@ -136,88 +102,25 @@ class CurrenciesSwitcher extends Component {
     const submitDisabled = currencyFrom === currencyTo || exceedsBalance;
 
     return (
-      <div className="exchanging-form-container">
-        <div className="exchanging-form-box">
-            <p className="exchange-rate">
-              {
-                currentExchangeRate ? 
-                  <>
-                    1 {currencyFrom} =&nbsp;
-                    <CurrencyFormat value={currentExchangeRate} displayType={'text'} thousandSeparator={true} decimalScale={2} />
-                    &nbsp;
-                    {currencyTo}
-                  </>
-                  :
-                  "Loading"
-              }
-              
-            </p>
-            <h2>
-              <button className="left" onClick={this.setPreviousFromCurrency}>
-                <i className="fa fa-chevron-left" /> 
-              </button>
-              {currencyFrom} 
-              <button className="right" onClick={this.setNextFromCurrency}>
-                <i className="fa fa-chevron-right" />
-              </button>
-            </h2>
-            <CurrencyFormat 
-              value={valueFrom} 
-              thousandSeparator={true} 
-              decimalScale={2}
-              allowNegative={false}
-              onValueChange={this.onValueFromChange}/>
-              {
-                exceedsBalance &&
-                  <p className="exceeds-balance">Exceeds balance</p>
-              }
-            <p>You have <CurrencyFormat value={balances[currencyFrom]} displayType={'text'} thousandSeparator={true} decimalScale={2} />
-            &nbsp;{currencyFrom}</p>
-        </div>
-        
-       
-        <div className="exchanging-form-box">
-          <button className="swap-currencies" onClick={this.swapCurrencies}>
-            <i className="fas fa-arrows-alt-v"/>
-          </button>
-          <h2>
-            <button className="left" onClick={this.setPreviousToCurrency}>
-              <i className="fa fa-chevron-left"/>
-            </button>
-            {currencyTo} 
-            <button className="right" onClick={this.setNextToCurrency}>
-              <i className="fa fa-chevron-right"/>
-            </button>
-          </h2>
-          <CurrencyFormat 
-            value={valueTo} 
-            thousandSeparator={true} 
-            decimalScale={2}
-            allowNegative={false}
-            onValueChange={this.onValueToChange}/>
-          <p>You have <CurrencyFormat value={balances[currencyTo]} displayType={'text'} thousandSeparator={true} decimalScale={2} />
-          &nbsp;{currencyTo}</p>
-          <p className="exchange-rate value-to">
-            {
-              currentExchangeRateForValueTo ? 
-                <>1 {currencyTo} =&nbsp;
-                <CurrencyFormat value={currentExchangeRateForValueTo} displayType={'text'} thousandSeparator={true} decimalScale={2} />
-                &nbsp;
-                {currencyFrom}
-                </>
-                :
-                "Loading"
-            }
-            
-          </p>
-        </div>
-
-        <div className="submit-button-container">
-          <button className="submit-button" onClick={this.onExchangeClicked} disabled={submitDisabled}>Exchange</button>
-        </div>
-
-        <ToastContainer />
-      </div>
+      <CurrenciesSwitcherPresenter
+        currentExchangeRate={currentExchangeRate}
+        currencyFrom={currencyFrom}
+        currencyTo={currencyTo}
+        valueFrom={valueFrom}
+        valueTo={valueTo}
+        exceedsBalance={exceedsBalance}
+        balances={balances}
+        currentExchangeRateForValueTo={currentExchangeRateForValueTo}
+        submitDisabled={submitDisabled}
+        onValueFromChange={this.onValueFromChange}
+        onValueToChange={this.onValueToChange}
+        onSubmit={this.onSubmit}
+        swapCurrencies={() => this.onCurrencyChange({currencyTo: currencyFrom, currencyFrom: currencyTo})}
+        setPreviousToCurrency={() => this.changeCurrencyTo(-1)}
+        setNextToCurrency={() => this.changeCurrencyTo(1)}
+        setPreviousFromCurrency={() => this.changeCurrencyFrom(-1)}
+        setNextFromCurrency={() => this.changeCurrencyFrom(1)}
+      />
     )
   }
 }

@@ -17,18 +17,24 @@ describe('CurrenciesSwitcher component', () => {
   describe('onExchangeClicked', () => {
 
     it('does not allow to use more money than user balance for currency', () => {
+      const mockCallback = jest.fn(x => x);
+
       const wrapper = shallow(
-           <CurrenciesSwitcher balances={{"EUR": 10}} currencies={{}}/>
+           <CurrenciesSwitcher 
+              balances={{"EUR": 10}} 
+              currencies={{}}
+              updateBalances={mockCallback}
+            />
         );
 
       const componentInstance = wrapper.instance();
-      componentInstance.onValueFromChange({target: {value: 11}})
-      let onExchangeClickedRes = componentInstance.onExchangeClicked();
+      componentInstance.onValueFromChange({value: 11})
+      let onExchangeClickedRes = componentInstance.onSubmit();
 
       expect(onExchangeClickedRes).toBe(false);
     });
 
-    it('exchanges money bases od current exchange rate for currency', () => {
+    it('exchanges money bases on current exchange rate for currency', () => {
       const mockCallback = jest.fn(x => x);
 
       const wrapper = shallow(
@@ -39,8 +45,8 @@ describe('CurrenciesSwitcher component', () => {
       );
 
       const componentInstance = wrapper.instance();
-      componentInstance.onValueFromChange({target: {value: 1}})
-      let onExchangeClickedRes = componentInstance.onExchangeClicked();
+      componentInstance.onValueFromChange({value: 1})
+      let onExchangeClickedRes = componentInstance.onSubmit();
       expect(mockCallback.mock.calls[0][0]).toStrictEqual({
         "EUR": 9,
         "USD": 1.5
@@ -49,7 +55,7 @@ describe('CurrenciesSwitcher component', () => {
       expect(onExchangeClickedRes).toBe(true);
     })
 
-    it('exchanges money bases od current exchange rate for currency different than USD', () => {
+    it('exchanges money bases on current exchange rate for currency different than USD', () => {
       const mockCallback = jest.fn(x => x);
 
       const wrapper = shallow(
@@ -60,11 +66,10 @@ describe('CurrenciesSwitcher component', () => {
       );
 
       const componentInstance = wrapper.instance();
-      componentInstance.onCurrencyFromChange("USD")
-      componentInstance.onCurrencyToChange("GBP")
-      componentInstance.onValueFromChange({target: {value: 1}})
+      componentInstance.onCurrencyChange({currencyFrom: "USD", currencyTo: "GBP"})
+      componentInstance.onValueFromChange({value: 1})
 
-      let onExchangeClickedRes = componentInstance.onExchangeClicked();
+      let onExchangeClickedRes = componentInstance.onSubmit();
       expect(mockCallback.mock.calls[0][0]).toStrictEqual({
         "EUR": 10,
         "USD": 2,
