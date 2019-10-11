@@ -1,4 +1,4 @@
-# Project Title
+# Revolut Exchange Screen
 
 Revolut training test, implementation of Revolut Echange Screen using React. 
 
