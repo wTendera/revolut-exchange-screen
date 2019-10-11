@@ -2,7 +2,8 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { updateBalances } from '../redux/sagas'
 import CurrencyFormat from 'react-currency-format';
- 
+import { ToastContainer, toast } from 'react-toastify';
+
 const currencies = [
   'USD', 'EUR', 'GBP'
 ]
@@ -32,7 +33,7 @@ class CurrenciesSwitcher extends Component {
     const { currencyFrom, currencyTo, valueFrom } = this.state;
     const { balances, updateBalances, currencies } = this.props;
 
-    if(valueFrom > balances[currencyFrom]) {
+    if(valueFrom > balances[currencyFrom] || currencyFrom === currencyTo || !valueFrom) {
       return false;
     }
 
@@ -47,6 +48,8 @@ class CurrenciesSwitcher extends Component {
       valueFrom: '',
       valueTo: '',
     })
+
+    toast.success(`You have succesfully exchanged ${valueFrom} ${currencyFrom} to ${currencyTo}`)
     updateBalances(newBalances)
     return true;
   }
@@ -113,13 +116,25 @@ class CurrenciesSwitcher extends Component {
     this.onCurrencyToChange(currencies[newIndex]);
   }
 
+  swapCurrencies = () => {
+    const { currencyFrom, currencyTo } = this.state;
+    this.setState({
+      currencyFrom: currencyTo,
+      currencyTo: currencyFrom,
+      valueFrom: '',
+      valueTo: ''
+    })
+  }
+
 
   render () {
     const { balances } = this.props;
     const { currencyFrom, currencyTo, valueFrom, valueTo } = this.state;
     const currentExchangeRate = this.getExchangeRateForCurrentCurrencies();
     const currentExchangeRateForValueTo = this.getValueToExchangeRate();
-    
+    const exceedsBalance = valueFrom > balances[currencyFrom];
+    const submitDisabled = currencyFrom === currencyTo || exceedsBalance;
+
     return (
       <div className="exchanging-form-container">
         <div className="exchanging-form-box">
@@ -152,46 +167,56 @@ class CurrenciesSwitcher extends Component {
               decimalScale={2}
               allowNegative={false}
               onValueChange={this.onValueFromChange}/>
+              {
+                exceedsBalance &&
+                  <p className="exceeds-balance">Exceeds balance</p>
+              }
             <p>You have <CurrencyFormat value={balances[currencyFrom]} displayType={'text'} thousandSeparator={true} decimalScale={2} />
             &nbsp;{currencyFrom}</p>
         </div>
-
+        
+       
         <div className="exchanging-form-box">
-            <h2>
-              <button className="left" onClick={this.setPreviousToCurrency}>
-                <i className="fa fa-chevron-left"/>
-              </button>
-              {currencyTo} 
-              <button className="right" onClick={this.setNextToCurrency}>
-                <i className="fa fa-chevron-right"/>
-              </button>
-            </h2>
-            <CurrencyFormat 
-              value={valueTo} 
-              thousandSeparator={true} 
-              decimalScale={2}
-              allowNegative={false}
-              onValueChange={this.onValueToChange}/>
-            <p>You have <CurrencyFormat value={balances[currencyTo]} displayType={'text'} thousandSeparator={true} decimalScale={2} />
-            &nbsp;{currencyTo}</p>
-            <p className="exchange-rate value-to">
-              {
-                currentExchangeRateForValueTo ? 
-                  <>1 {currencyTo} =&nbsp;
-                  <CurrencyFormat value={currentExchangeRateForValueTo} displayType={'text'} thousandSeparator={true} decimalScale={2} />
-                  &nbsp;
-                  {currencyFrom}
-                  </>
-                  :
-                  "Loading"
-              }
-              
-            </p>
+          <button className="swap-currencies" onClick={this.swapCurrencies}>
+            <i className="fas fa-arrows-alt-v"/>
+          </button>
+          <h2>
+            <button className="left" onClick={this.setPreviousToCurrency}>
+              <i className="fa fa-chevron-left"/>
+            </button>
+            {currencyTo} 
+            <button className="right" onClick={this.setNextToCurrency}>
+              <i className="fa fa-chevron-right"/>
+            </button>
+          </h2>
+          <CurrencyFormat 
+            value={valueTo} 
+            thousandSeparator={true} 
+            decimalScale={2}
+            allowNegative={false}
+            onValueChange={this.onValueToChange}/>
+          <p>You have <CurrencyFormat value={balances[currencyTo]} displayType={'text'} thousandSeparator={true} decimalScale={2} />
+          &nbsp;{currencyTo}</p>
+          <p className="exchange-rate value-to">
+            {
+              currentExchangeRateForValueTo ? 
+                <>1 {currencyTo} =&nbsp;
+                <CurrencyFormat value={currentExchangeRateForValueTo} displayType={'text'} thousandSeparator={true} decimalScale={2} />
+                &nbsp;
+                {currencyFrom}
+                </>
+                :
+                "Loading"
+            }
+            
+          </p>
         </div>
 
         <div className="submit-button-container">
-          <button className="submit-button" onClick={this.onExchangeClicked}>Exchange</button>
+          <button className="submit-button" onClick={this.onExchangeClicked} disabled={submitDisabled}>Exchange</button>
         </div>
+
+        <ToastContainer />
       </div>
     )
   }
